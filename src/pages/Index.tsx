@@ -20,18 +20,8 @@ const Index = () => {
       <div className="relative bg-background">
         <div className="container mx-auto px-6 py-20 space-y-16">
           
-          {/* Navigation */}
-          <div className="text-center">
-            <Link to="/about">
-              <Button variant="ghost" className="mb-8">
-                <User className="mr-2" size={16} />
-                About the Developer
-              </Button>
-            </Link>
-          </div>
-
           {/* Upload Section */}
-          <section>
+          <section id="upload-section">
             <UploadSection />
           </section>
 
