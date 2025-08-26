@@ -28,8 +28,13 @@ export default function About() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Profile Image */}
               <div className="text-center lg:text-left">
-                <div className="w-48 h-48 mx-auto lg:mx-0 bg-gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-glow">
-                  <img src = "./public/bhavya.png"></img>
+                <div className="w-48 h-48 mx-auto lg:mx-0 bg-gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-glow overflow-hidden">
+                  <img
+                    src={`${import.meta.env.BASE_URL}bhavya.png`}
+                    alt="Bhavya Arora"
+                    className="w-full h-full object-cover rounded-2xl"
+                    loading="lazy"
+                  />
                 </div>
                 
                 {/* Social Links */}

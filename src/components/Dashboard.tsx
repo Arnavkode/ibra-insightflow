@@ -68,34 +68,6 @@ export const Dashboard = ({ reportData }: { reportData?: any }) => {
       <strong>No analysis data:</strong> No valid report data was received. Showing placeholders and randomly generated insights.
     </GlassCard>
   );
-  // Gmail export
-  const handleGmailExport = () => {
-    if (!reportData) return;
-    const kpis = reportData.kpis || {};
-    const summary = reportData.summary || {};
-    let body = `Business Insights Report\n\n`;
-    body += `Type: ${reportData.type || ''}\n`;
-    body += `Columns: ${(summary.columns || []).join(', ')}\n`;
-    body += `KPIs:\n`;
-    Object.entries(kpis).forEach(([k, v]) => {
-      body += `- ${k.replace(/_/g, ' ')}: ${typeof v === 'number' ? v.toFixed(2) : v}\n`;
-    });
-    body += `\nSummary:\n`;
-    if (summary.summary) {
-      Object.entries(summary.summary).forEach(([col, stats]) => {
-        body += `${col}: `;
-        Object.entries(stats as any).forEach(([stat, val]) => {
-          body += `${stat}: ${val}, `;
-        });
-        body += `\n`;
-      });
-    }
-    const mailto = `mailto:?subject=Business Insights Report&body=${encodeURIComponent(body)}`;
-    window.open(mailto, '_blank');
-  };
-  const handleDownload = () => {
-    window.open('http://localhost:5000/api/download', '_blank');
-  };
   // Helper to handle NaN/null
   const safe = (val: any) => (val === null || val === undefined || String(val) === 'NaN' ? 'N/A' : val);
   const kpis = reportData?.kpis || {};
@@ -122,8 +94,57 @@ export const Dashboard = ({ reportData }: { reportData?: any }) => {
     }
     return copy.slice(0, n);
   }
+  const insights = (reportData && Array.isArray(reportData.insights) && reportData.insights.length > 0)
+    ? reportData.insights
+    : pickRandomInsights(insightPool, 3);
 
-  const insights = pickRandomInsights(insightPool, 3);
+  // Gmail export — uses available kpis/summary/insights even if reportData is partially missing
+  const handleGmailExport = () => {
+    let body = `Business Insights Report\n\n`;
+    body += `Type: ${type}\n`;
+    body += `Columns: ${(summary.columns || []).join(', ')}\n`;
+    body += `KPIs:\n`;
+    Object.entries(kpis).forEach(([k, v]) => {
+      body += `- ${k.replace(/_/g, ' ')}: ${typeof v === 'number' ? v.toFixed(2) : v}\n`;
+    });
+    body += `\nTop Insights:\n`;
+    const usedInsights = insights;
+    usedInsights.forEach((ins: string) => { body += `- ${ins}\n`; });
+    const mailto = `mailto:?subject=Business Insights Report&body=${encodeURIComponent(body)}`;
+    window.open(mailto, '_blank');
+  };
+
+  // Download: ask backend to generate PDF (POST /api/generate-pdf) then download blob. Fallback to JSON download.
+  const handleDownload = () => {
+    const payload = reportData || { summary, kpis, type };
+    fetch('http://localhost:5000/api/generate-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(async res => {
+      if (!res.ok) throw new Error('PDF generation failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    }).catch(err => {
+      console.warn('PDF generation failed, falling back to JSON download', err);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'report.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  };
   return (
     <div className="space-y-8 animate-slide-up">
       <div className="flex justify-end gap-4">
