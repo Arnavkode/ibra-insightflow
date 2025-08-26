@@ -29,7 +29,7 @@ export default function About() {
               {/* Profile Image */}
               <div className="text-center lg:text-left">
                 <div className="w-48 h-48 mx-auto lg:mx-0 bg-gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-glow">
-                  <img src = "public\bhavya.png"></img>
+                  <img src = "./public/bhavya.png"></img>
                 </div>
                 
                 {/* Social Links */}
