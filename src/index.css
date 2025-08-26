@@ -2,69 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* IBRAE Design System - Glassmorphism & Enterprise Gradients */
+/* IBRAE Design System - Dark Navy with Cyan Accents */
 
 @layer base {
   :root {
-    /* Base Colors */
-    --background: 240 15% 97%;
-    --foreground: 240 15% 15%;
+    /* Base Colors - Dark Navy Theme */
+    --background: 220 30% 8%;
+    --foreground: 220 15% 95%;
 
-    /* Glassmorphism Cards */
-    --card: 0 0% 100%;
-    --card-foreground: 240 15% 15%;
-    --glass: 240 20% 98%;
-    --glass-border: 240 10% 90%;
+    /* Card System */
+    --card: 220 25% 12%;
+    --card-foreground: 220 15% 95%;
+    --glass: 220 25% 10%;
+    --glass-border: 220 20% 20%;
 
-    /* Primary Brand Gradient: Indigo → Violet */
-    --primary: 243 75% 59%;
-    --primary-dark: 262 70% 45%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 250 100% 85%;
+    /* Primary: Bright Cyan */
+    --primary: 190 100% 60%;
+    --primary-dark: 200 100% 45%;
+    --primary-foreground: 220 30% 8%;
+    --primary-glow: 190 100% 80%;
 
-    /* Accent: Teal for Success */
-    --accent: 174 100% 35%;
-    --accent-light: 174 60% 88%;
+    /* Accent: Purple/Violet */
+    --accent: 260 80% 65%;
+    --accent-light: 260 60% 85%;
     --accent-foreground: 0 0% 100%;
 
     /* Secondary & Muted */
-    --secondary: 240 10% 96%;
-    --secondary-foreground: 240 15% 25%;
-    --muted: 240 8% 94%;
-    --muted-foreground: 240 10% 45%;
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 220 15% 85%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 65%;
 
     /* Interactive States */
-    --hover: 240 15% 94%;
-    --active: 243 75% 59%;
+    --hover: 220 20% 12%;
+    --active: 190 100% 60%;
 
     /* Utility Colors */
     --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 100%;
     --warning: 45 90% 55%;
-    --warning-foreground: 45 15% 15%;
+    --warning-foreground: 0 0% 100%;
 
     /* Borders & Inputs */
-    --border: 240 8% 88%;
-    --input: 240 8% 94%;
-    --input-border: 240 12% 82%;
-    --ring: 243 75% 59%;
+    --border: 220 15% 25%;
+    --input: 220 20% 15%;
+    --input-border: 220 20% 30%;
+    --ring: 190 100% 60%;
 
-    /* Glassmorphism Effects */
-    --glass-backdrop: 240 20% 98% / 0.8;
-    --glass-shadow: 240 30% 15% / 0.1;
-    --glass-border-light: 0 0% 100% / 0.2;
+    /* Glass Effects */
+    --glass-backdrop: 220 25% 10% / 0.8;
+    --glass-shadow: 220 30% 5% / 0.3;
+    --glass-border-light: 0 0% 100% / 0.1;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(262 70% 45%));
-    --gradient-accent: linear-gradient(135deg, hsl(174 100% 35%), hsl(174 80% 45%));
-    --gradient-glass: linear-gradient(135deg, hsl(var(--glass)) 0%, hsl(240 25% 96%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(243 75% 59%) 0%, hsl(262 70% 45%) 50%, hsl(174 100% 35%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(190 100% 60%), hsl(200 100% 45%));
+    --gradient-accent: linear-gradient(135deg, hsl(260 80% 65%), hsl(280 70% 55%));
+    --gradient-glass: linear-gradient(135deg, hsl(220 25% 12%) 0%, hsl(220 20% 15%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 35% 12%) 0%, hsl(220 25% 8%) 50%, hsl(210 30% 10%) 100%);
+    --gradient-topbar: linear-gradient(90deg, hsl(220 100% 50%) 0%, hsl(190 100% 60%) 100%);
 
     /* Shadows */
-    --shadow-glass: 0 8px 32px -4px hsl(var(--glass-shadow));
-    --shadow-card: 0 4px 20px -2px hsl(240 30% 15% / 0.08);
-    --shadow-button: 0 4px 12px -2px hsl(243 75% 59% / 0.3);
-    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.6);
+    --shadow-glass: 0 8px 32px -4px hsl(220 30% 5% / 0.4);
+    --shadow-card: 0 4px 20px -2px hsl(220 30% 5% / 0.2);
+    --shadow-button: 0 4px 12px -2px hsl(190 100% 60% / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,44 +91,9 @@
   }
 
   .dark {
-    --background: 240 15% 8%;
-    --foreground: 240 15% 95%;
-
-    --card: 240 15% 12%;
-    --card-foreground: 240 15% 95%;
-    --glass: 240 15% 10%;
-    --glass-border: 240 10% 20%;
-
-    --primary: 250 100% 70%;
-    --primary-dark: 262 80% 55%;
-    --primary-foreground: 240 15% 8%;
-    --primary-glow: 250 100% 85%;
-
-    --accent: 174 100% 45%;
-    --accent-light: 174 60% 25%;
-    --accent-foreground: 0 0% 100%;
-
-    --secondary: 240 8% 18%;
-    --secondary-foreground: 240 15% 85%;
-    --muted: 240 8% 15%;
-    --muted-foreground: 240 10% 65%;
-
-    --hover: 240 10% 15%;
-    --active: 250 100% 70%;
-
-    --destructive: 0 75% 65%;
-    --destructive-foreground: 0 0% 100%;
-    --warning: 45 90% 60%;
-    --warning-foreground: 45 15% 15%;
-
-    --border: 240 8% 20%;
-    --input: 240 8% 18%;
-    --input-border: 240 12% 25%;
-    --ring: 250 100% 70%;
-
-    --glass-backdrop: 240 15% 10% / 0.8;
-    --glass-shadow: 240 30% 5% / 0.3;
-    --glass-border-light: 0 0% 100% / 0.1;
+    /* Keep same values for dark mode consistency */
+    --background: 220 30% 8%;
+    --foreground: 220 15% 95%;
   }
 }
 

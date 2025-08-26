@@ -67,7 +67,8 @@ export default {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-accent': 'var(--gradient-accent)',
 				'gradient-glass': 'var(--gradient-glass)',
-				'gradient-hero': 'var(--gradient-hero)'
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-topbar': 'var(--gradient-topbar)'
 			},
 			boxShadow: {
 				'glass': 'var(--shadow-glass)',
