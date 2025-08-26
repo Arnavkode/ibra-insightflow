@@ -11,21 +11,30 @@ app.use(express.json());
 const upload = multer({ dest: 'uploads/' });
 
 app.post('/api/upload', upload.single('file'), (req, res) => {
-  // Call Python script for data cleaning & analysis
+  // Debug log: file upload
+  console.log('[UPLOAD] Received file:', req.file?.originalname, 'Stored at:', req.file?.path);
   const filePath = req.file.path;
   PythonShell.run('analyze.py', { args: [filePath] }, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error('[UPLOAD] Python error:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    console.log('[UPLOAD] Python results:', results);
     res.json({ results });
   });
 });
 
 
 app.post('/api/report', (req, res) => {
-  // Generate PDF/PPTX report
+  // Debug log: report generation
+  console.log('[REPORT] Request body:', req.body);
   const { data, options } = req.body;
   PythonShell.run('generate_report.py', { args: [JSON.stringify(data), JSON.stringify(options)] }, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    // Return path to PDF for download
+    if (err) {
+      console.error('[REPORT] Python error:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    console.log('[REPORT] Python results:', results);
     res.json({ report: results, pdfPath: 'report.pdf' });
   });
 });

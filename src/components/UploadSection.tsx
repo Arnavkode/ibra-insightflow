@@ -78,6 +78,7 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
       } else {
         resultObj = data;
       }
+      console.log('[Frontend] Parsed backend result:', resultObj);
       if (resultObj && resultObj.error) {
         toast({
           title: "Analysis failed",

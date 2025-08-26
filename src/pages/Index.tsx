@@ -13,8 +13,21 @@ const Index = () => {
   const [reportData, setReportData] = useState<any>(null);
   // Show dashboard after analysis/upload
   const handleShowDashboard = (data?: any) => {
-    if (data) setReportData(data);
-    setShowDashboard(true);
+    // Accept any object with 'summary' and 'kpis' keys as valid
+    if (
+      data &&
+      typeof data === 'object' &&
+      data.summary && typeof data.summary === 'object' &&
+      data.kpis && typeof data.kpis === 'object'
+    ) {
+      console.log('[Frontend] Dashboard received VALID reportData:', data);
+      setReportData(data);
+      setShowDashboard(true);
+    } else {
+      console.warn('[Frontend] Dashboard received INVALID or empty reportData:', data);
+      setReportData(null);
+      setShowDashboard(true); // Still show dashboard for error state
+    }
   };
 
   return (
@@ -28,7 +41,13 @@ const Index = () => {
           
           {/* Upload Section */}
           <section id="upload-section">
-            <UploadSection onAnalyze={handleShowDashboard} />
+            <UploadSection
+              onAnalyze={(data: any) => {
+                // Log and validate incoming data from backend
+                console.log('[Frontend] UploadSection onAnalyze received:', data);
+                handleShowDashboard(data);
+              }}
+            />
           </section>
 
           {/* Dashboard Section - Mock shown for demo */}

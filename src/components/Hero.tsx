@@ -83,9 +83,7 @@ export const Hero = () => {
               >
                 Start Analyzing Now
               </Button>
-              <Button variant="outline" size="xl" className="text-lg px-8 py-4">
-                Learn More
-              </Button>
+              
             </div>
           </div>
         </div>
