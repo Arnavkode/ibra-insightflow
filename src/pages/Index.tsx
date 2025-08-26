@@ -10,6 +10,12 @@ import { User, BarChart3, Zap, Share2, Mail } from "lucide-react";
 
 const Index = () => {
   const [showDashboard, setShowDashboard] = useState(false);
+  const [reportData, setReportData] = useState<any>(null);
+  // Show dashboard after analysis/upload
+  const handleShowDashboard = (data?: any) => {
+    if (data) setReportData(data);
+    setShowDashboard(true);
+  };
 
   return (
     <div className="min-h-screen">
@@ -22,28 +28,16 @@ const Index = () => {
           
           {/* Upload Section */}
           <section id="upload-section">
-            <UploadSection />
+            <UploadSection onAnalyze={handleShowDashboard} />
           </section>
 
           {/* Dashboard Section - Mock shown for demo */}
-          <section className="space-y-8">
-            <div className="text-center">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowDashboard(!showDashboard)}
-                className="mb-8"
-              >
-                <BarChart3 className="mr-2" size={16} />
-                {showDashboard ? 'Hide' : 'Show'} Sample Dashboard
-              </Button>
-            </div>
-
-            {showDashboard && (
-              <div className="animate-slide-up">
-                <Dashboard />
-              </div>
-            )}
-          </section>
+          {/* Dashboard shown after analysis/upload */}
+          {showDashboard && (
+            <section className="animate-slide-up">
+              <Dashboard reportData={reportData} />
+            </section>
+          )}
 
           {/* Report Actions - Show when dashboard is visible */}
           {showDashboard && (
@@ -57,56 +51,34 @@ const Index = () => {
             <GlassCard variant="subtle" className="p-8 text-center">
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-2xl font-bold text-foreground mb-4">
-                  The Future of Business Intelligence
+                  Intelligent Business Reporting & Analytics Engine
                 </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="p-3 bg-primary/10 rounded-full">
-                      <Zap className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">Automated data-to-report pipeline</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="p-3 bg-accent/10 rounded-full">
-                      <BarChart3 className="h-6 w-6 text-accent" />
-                    </div>
-                    <span className="text-sm font-medium">Context-aware insights</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="p-3 bg-primary/10 rounded-full">
-                      <Share2 className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">One-click dashboards</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="p-3 bg-accent/10 rounded-full">
-                      <Mail className="h-6 w-6 text-accent" />
-                    </div>
-                    <span className="text-sm font-medium">Email & share reports</span>
+                <div className="mb-8 text-lg text-muted-foreground">
+                  Built an automated data-to-report pipeline with context-aware insights, enabling one-click KPI dashboard and top three action items, improving reporting efficiency by 80%.
+                </div>
+                <div className="text-left text-muted-foreground mb-8">
+                  <strong>Project Idea: Smart Business Insights Generator</strong><br />
+                  <ol className="list-decimal ml-6">
+                    <li>Upload File (Excel, CSV, or Google Sheet link)</li>
+                    <li>Auto Data Cleaning: Remove duplicates, handle missing values, standardize date formats</li>
+                    <li>Automated Exploratory Analysis: Summary statistics, outlier detection</li>
+                    <li>KPI Calculation: Dataset-specific KPIs (e.g., sales → revenue growth, churn rate, profit margin)</li>
+                    <li>Visualization & Dashboard: Auto-generate graphs (sales trends, customer segments, region performance, etc.)</li>
+                    <li>Export Final Report: Professional PDF with charts + summary, optionally PowerPoint deck</li>
+                  </ol>
+                  <ul className="list-disc ml-6 mt-4">
+                    <li>Business Context Auto-Detection: Script detects dataset type and tailors KPIs</li>
+                    <li>One-Click Report: Raw data → consulting-level report</li>
+                    <li>Custom Insights: Highlights top 3 actionable insights</li>
+                    <li>Email Integration (optional): Automatically sends report to stakeholders</li>
+                  </ul>
+                  <div className="mt-4">
+                    <strong>Tech Stack:</strong> Python (pandas, numpy, matplotlib, seaborn, plotly, openpyxl/xlrd, fpdf/reportlab, python-pptx, ydata-profiling)<br />
+                    <strong>Example Output (PDF Report):</strong> Executive Summary, Key Metrics Table, Graphs, Insights & Recommendations
                   </div>
                 </div>
-
-                <p className="text-muted-foreground mb-6">
-                  Transform your business data into strategic advantages with IBRAE's 
-                  intelligent reporting engine. Experience the power of AI-driven analytics 
-                  that understands your business context.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="default" size="lg">
-                    Start Free Trial
-                  </Button>
-                  <Button variant="outline" size="lg">
-                    Schedule Demo
-                  </Button>
-                </div>
-
                 <div className="mt-8 pt-8 border-t border-glass-border text-sm text-muted-foreground">
-                  <p>© 2024 IBRAE - Intelligent Business Reporting & Analytics Engine</p>
+                  <p>© 2025 Intelligent Business Reporting & Analytics Engine</p>
                   <p className="mt-2">Built with passion for data-driven businesses</p>
                 </div>
               </div>

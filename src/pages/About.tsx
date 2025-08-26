@@ -29,7 +29,7 @@ export default function About() {
               {/* Profile Image */}
               <div className="text-center lg:text-left">
                 <div className="w-48 h-48 mx-auto lg:mx-0 bg-gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-glow">
-                  <Code size={80} className="text-white" />
+                  <img src = "public\bhavya.png"></img>
                 </div>
                 
                 {/* Social Links */}
@@ -49,8 +49,8 @@ export default function About() {
               {/* Content */}
               <div className="lg:col-span-2 space-y-6">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground mb-2">Your Developer</h1>
-                  <p className="text-xl text-primary font-semibold">Full-Stack Engineer & Data Analytics Specialist</p>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">Bhavya Arora</h1>
+                  <p className="text-xl text-primary font-semibold">Electrical Engineering, Data analytics enthusiast</p>
                 </div>
 
                 <div className="space-y-4 text-muted-foreground">

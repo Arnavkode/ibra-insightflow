@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,12 +8,18 @@ import { GlassCard } from "./GlassCard";
 import { Upload, FileText, Link, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export const UploadSection = () => {
+interface UploadSectionProps {
+  onAnalyze?: (reportData?: any) => void;
+}
+
+export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [generatePdf, setGeneratePdf] = useState(true);
   const [generatePptx, setGeneratePptx] = useState(false);
   const [persistReport, setPersistReport] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [sheetUrl, setSheetUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
@@ -36,7 +42,7 @@ export const UploadSection = () => {
     }
   };
 
-  const handleFiles = (file: File) => {
+  const handleFiles = async (file: File) => {
     const validTypes = ['.csv', '.xlsx', '.xls'];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
     
@@ -50,21 +56,92 @@ export const UploadSection = () => {
     }
 
     toast({
-      title: "File uploaded successfully",
-      description: `${file.name} is ready for analysis`,
+      title: "Uploading...",
+      description: `${file.name} is being sent for analysis`,
     });
+
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      let resultObj = undefined;
+      if (data.results && Array.isArray(data.results) && typeof data.results[0] === 'string') {
+        try {
+          resultObj = JSON.parse(data.results[0]);
+        } catch (e) {
+          resultObj = data.results[0];
+        }
+      } else {
+        resultObj = data;
+      }
+      if (resultObj && resultObj.error) {
+        toast({
+          title: "Analysis failed",
+          description: resultObj.error,
+          variant: "destructive"
+        });
+        if (onAnalyze) onAnalyze(undefined);
+      } else {
+        toast({
+          title: "Analysis complete!",
+          description: "Your dashboard is ready with insights and KPIs",
+        });
+        if (onAnalyze) onAnalyze(resultObj);
+      }
+    } catch (err) {
+      toast({
+        title: "Analysis failed",
+        description: "Could not process file. Try again later.",
+        variant: "destructive"
+      });
+      if (onAnalyze) onAnalyze(undefined);
+    }
   };
 
   const handleAnalyze = () => {
-    setIsAnalyzing(true);
-    // Simulate analysis
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsAnalyzing(false);
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files[0]);
+    }
+  };
+
+  const handleGoogleSheetAnalyze = async () => {
+    if (!sheetUrl || !sheetUrl.startsWith("https://")) {
       toast({
-        title: "Analysis complete!",
-        description: "Your dashboard is ready with insights and KPIs",
+        title: "Invalid URL",
+        description: "Please enter a valid Google Sheets CSV export URL.",
+        variant: "destructive"
       });
-    }, 3000);
+      return;
+    }
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch(sheetUrl);
+      if (!res.ok) throw new Error("Failed to fetch Google Sheet");
+      const csvText = await res.text();
+      // Convert CSV text to Blob and File
+      const blob = new Blob([csvText], { type: "text/csv" });
+      const file = new File([blob], "google_sheet.csv", { type: "text/csv" });
+      await handleFiles(file);
+    } catch (err) {
+      toast({
+        title: "Google Sheets fetch failed",
+        description: "Could not fetch or process the Google Sheet.",
+        variant: "destructive"
+      });
+    }
+    setIsAnalyzing(false);
   };
 
   return (
@@ -101,9 +178,16 @@ export const UploadSection = () => {
             <FileText className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
             <p className="text-lg mb-2">Drag & drop your CSV or Excel file here</p>
             <p className="text-muted-foreground mb-6">or</p>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={handleAnalyze} disabled={isAnalyzing}>
               Browse Files
             </Button>
+            <input
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              style={{ display: "none" }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
             <p className="text-sm text-muted-foreground mt-4">
               Supports CSV, XLSX, XLS files up to 10MB
             </p>
@@ -115,7 +199,13 @@ export const UploadSection = () => {
             <Input 
               placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv"
               className="text-base py-3"
+              value={sheetUrl}
+              onChange={e => setSheetUrl(e.target.value)}
+              disabled={isAnalyzing}
             />
+            <Button variant="outline" size="lg" onClick={handleGoogleSheetAnalyze} disabled={isAnalyzing}>
+              Fetch & Analyze Google Sheet
+            </Button>
             <p className="text-sm text-muted-foreground">
               Paste your public Google Sheets CSV export URL. 
               <a href="#" className="text-primary hover:underline ml-1">
