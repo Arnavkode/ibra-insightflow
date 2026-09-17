@@ -100,11 +100,14 @@ func analyzeFile(path string) AnalysisResult {
 	summary := computeSummary(raw, cleaned)
 	dtype := detectType(cleaned.Columns)
 	kpis := computeKPIs(cleaned, dtype)
+	mlReport := runMLAnalysis(cleaned, dtype)
 	insights := generateInsights(cleaned, summary)
+	insights = appendMLInsights(insights, mlReport)
 
 	return AnalysisResult{
 		Summary:  summary,
 		KPIs:     kpis,
+		ML:       mlReport,
 		Type:     dtype,
 		Insights: insights,
 	}

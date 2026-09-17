@@ -14,6 +14,7 @@ type ReportPayload struct {
 	Type     string             `json:"type"`
 	Summary  Summary            `json:"summary"`
 	KPIs     map[string]float64 `json:"kpis"`
+	ML       MLReport           `json:"ml"`
 	Insights []string           `json:"insights"`
 }
 
@@ -45,6 +46,24 @@ func writePDF(w io.Writer, p ReportPayload) error {
 		pdf.SetFont("Helvetica", "", 11)
 		for _, col := range sortedKeys(p.Summary.Missing) {
 			pdf.CellFormat(0, 6, fmt.Sprintf("  - %s: %d", col, p.Summary.Missing[col]), "", 1, "", false, 0, "")
+		}
+	}
+	pdf.Ln(4)
+	pdf.SetFont("Helvetica", "B", 14)
+	pdf.CellFormat(0, 8, "ML KPI Predictions", "", 1, "", false, 0, "")
+	pdf.SetFont("Helvetica", "", 11)
+	if len(p.ML.Predictions) == 0 {
+		pdf.MultiCell(0, 6, orNA(p.ML.Message), "", "", false)
+	} else {
+		keys := make([]string, 0, len(p.ML.Predictions))
+		for key := range p.ML.Predictions {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			prediction := p.ML.Predictions[key]
+			label := strings.ReplaceAll(key, "_", " ")
+			pdf.CellFormat(0, 6, fmt.Sprintf("%s: %.4f (%s)", label, prediction.Value, prediction.Model), "", 1, "", false, 0, "")
 		}
 	}
 	pdf.Ln(4)

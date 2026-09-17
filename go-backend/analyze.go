@@ -26,11 +26,12 @@ type Summary struct {
 }
 
 type AnalysisResult struct {
-	Summary  Summary        `json:"summary"`
+	Summary  Summary            `json:"summary"`
 	KPIs     map[string]float64 `json:"kpis"`
-	Type     string         `json:"type"`
-	Insights []string       `json:"insights"`
-	Error    string         `json:"error,omitempty"`
+	ML       MLReport           `json:"ml"`
+	Type     string             `json:"type"`
+	Insights []string           `json:"insights"`
+	Error    string             `json:"error,omitempty"`
 }
 
 func missingCounts(t *Table) map[string]int {
@@ -205,10 +206,10 @@ func findColumn(columns []string, synonyms []string) int {
 }
 
 var (
-	revenueSynonyms  = []string{"revenue", "sales", "totalsales", "income", "amount"}
-	profitSynonyms   = []string{"profit", "netprofit", "margin"}
-	leftSynonyms     = []string{"employeeleft", "attrition", "churned", "left", "terminated"}
-	convertSynonyms  = []string{"converted", "conversion", "isconverted", "purchase"}
+	revenueSynonyms = []string{"revenue", "sales", "totalsales", "income", "amount"}
+	profitSynonyms  = []string{"profit", "netprofit", "margin"}
+	leftSynonyms    = []string{"employeeleft", "attrition", "churned", "left", "terminated"}
+	convertSynonyms = []string{"converted", "conversion", "isconverted", "purchase"}
 )
 
 func computeKPIs(t *Table, dtype string) map[string]float64 {

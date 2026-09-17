@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { GlassCard } from "./GlassCard";
 import { Upload, FileText, Link, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { AnalysisReport } from "@/types/analysis";
 
 interface UploadSectionProps {
-  onAnalyze?: (reportData?: any) => void;
+  onAnalyze?: (reportData: AnalysisReport) => void;
 }
 
 export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
@@ -50,7 +51,7 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
       const formData = new FormData();
       formData.append('file', file);
       const res = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: formData });
-      const body = await res.json();
+      const body = await res.json() as AnalysisReport;
 
       if (!res.ok || body.error) {
         toast({
@@ -62,7 +63,7 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
         return;
       }
 
-      toast({ title: "Analysis complete!", description: "Your dashboard is ready with insights and KPIs" });
+      toast({ title: "Analysis complete!", description: "Your dashboard is ready with KPIs and ML predictions" });
       setIsAnalyzing(false);
       if (onAnalyze) onAnalyze(body);
     } catch (err) {
@@ -241,7 +242,7 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
         </Button>
         
         <p className="text-sm text-muted-foreground mt-4">
-          <span className="font-medium text-accent">⚡ Data cleaning, KPIs, and insights computed from your file</span>
+          <span className="font-medium text-accent">⚡ Data cleaning, calculated KPIs, and ML forecasts from your file</span>
         </p>
       </div>
     </GlassCard>

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
+	"strings"
 )
 
 func excludeIdentifierColumns(t *Table, idx []int) []int {
@@ -13,6 +15,29 @@ func excludeIdentifierColumns(t *Table, idx []int) []int {
 		}
 	}
 	return out
+}
+
+// appendMLInsights makes trained forecasts visible in the narrative report.
+// It deliberately does not turn skipped/error states into fake insights.
+func appendMLInsights(insights []string, report MLReport) []string {
+	if report.Status != "trained" || len(report.Predictions) == 0 {
+		return insights
+	}
+	keys := make([]string, 0, len(report.Predictions))
+	for key := range report.Predictions {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		prediction := report.Predictions[key]
+		label := strings.ReplaceAll(key, "_", " ")
+		insight := fmt.Sprintf("ML %s is %.2f using %s (%d training rows)", label, prediction.Value, prediction.Model, prediction.TrainingRows)
+		if prediction.ValidationScore != nil && prediction.ValidationMetric != "" {
+			insight += fmt.Sprintf(", validation %s %.3f", prediction.ValidationMetric, *prediction.ValidationScore)
+		}
+		insights = append(insights, insight+".")
+	}
+	return insights
 }
 
 // generateInsights derives observations directly from the cleaned table's

@@ -7,12 +7,13 @@ import { ReportActions } from "@/components/ReportActions";
 import { GlassCard } from "@/components/GlassCard";
 import { Link } from "react-router-dom";
 import { User, BarChart3, Zap, Share2, Mail } from "lucide-react";
+import type { AnalysisReport } from "@/types/analysis";
 
 const Index = () => {
   const [showDashboard, setShowDashboard] = useState(false);
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<AnalysisReport | null>(null);
   // Show dashboard after analysis/upload
-  const handleShowDashboard = (data?: any) => {
+  const handleShowDashboard = (data?: AnalysisReport) => {
     // Accept any object with 'summary' and 'kpis' keys as valid
     if (
       data &&
@@ -42,7 +43,7 @@ const Index = () => {
           {/* Upload Section */}
           <section id="upload-section">
             <UploadSection
-              onAnalyze={(data: any) => {
+              onAnalyze={(data) => {
                 // Log and validate incoming data from backend
                 console.log('[Frontend] UploadSection onAnalyze received:', data);
                 handleShowDashboard(data);
@@ -80,7 +81,7 @@ const Index = () => {
                     <li>Upload File (Excel, CSV, or Google Sheet link)</li>
                     <li>Auto Data Cleaning: Remove duplicates, handle missing values, standardize date formats</li>
                     <li>Automated Exploratory Analysis: Summary statistics, outlier detection</li>
-                    <li>KPI Calculation: Dataset-specific KPIs (e.g., sales → revenue growth, churn rate, profit margin)</li>
+                    <li>KPI Analysis: Calculate actual metrics, then train ML models for eligible forecasts and risk rates</li>
                     <li>Visualization & Dashboard: Auto-generate graphs (sales trends, customer segments, region performance, etc.)</li>
                     <li>Export Final Report: Professional PDF with charts + summary, optionally PowerPoint deck</li>
                   </ol>
@@ -91,7 +92,7 @@ const Index = () => {
                     <li>Email Integration (optional): Automatically sends report to stakeholders</li>
                   </ul>
                   <div className="mt-4">
-                    <strong>Tech Stack:</strong> Python (pandas, numpy, matplotlib, seaborn, plotly, openpyxl/xlrd, fpdf/reportlab, python-pptx, ydata-profiling)<br />
+                    <strong>Tech Stack:</strong> Go API, Python (pandas, scikit-learn, XGBoost), React, and TypeScript<br />
                     <strong>Example Output (PDF Report):</strong> Executive Summary, Key Metrics Table, Graphs, Insights & Recommendations
                   </div>
                 </div>

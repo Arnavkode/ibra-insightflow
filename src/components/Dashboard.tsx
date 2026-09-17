@@ -1,8 +1,9 @@
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
-import { DollarSign } from "lucide-react";
+import { BrainCircuit, DollarSign } from "lucide-react";
+import type { AnalysisReport, AnalysisSummary, MLReport } from "@/types/analysis";
 
-export const Dashboard = ({ reportData }: { reportData?: any }) => {
+export const Dashboard = ({ reportData }: { reportData?: AnalysisReport | null }) => {
   // don't block rendering. show banner if no data, but still render UI.
   const hasData = !!(reportData && typeof reportData === 'object' && Object.keys(reportData).length > 0);
 
@@ -12,9 +13,22 @@ export const Dashboard = ({ reportData }: { reportData?: any }) => {
     </GlassCard>
   );
   // Helper to handle NaN/null
-  const safe = (val: any) => (val === null || val === undefined || String(val) === 'NaN' ? 'N/A' : val);
+  const safe = (val: unknown) => (val === null || val === undefined || String(val) === 'NaN' ? 'N/A' : String(val));
   const kpis = reportData?.kpis || {};
-  const summary = reportData?.summary || {};
+  const ml: MLReport = reportData?.ml || {
+    status: "skipped",
+    model_family: "none",
+    predictions: {},
+    message: "Upload a dataset to train KPI prediction models.",
+  };
+  const predictions = ml.predictions || {};
+  const summary: AnalysisSummary = reportData?.summary ?? {
+    shape: [0, 0],
+    columns: [],
+    summary: {},
+    missing: {},
+    outliers: {},
+  };
   const type = safe(reportData?.type);
   const insights: string[] = Array.isArray(reportData?.insights) ? reportData.insights : [];
 
@@ -26,6 +40,11 @@ export const Dashboard = ({ reportData }: { reportData?: any }) => {
     Object.entries(kpis).forEach(([k, v]) => {
       body += `- ${k.replace(/_/g, ' ')}: ${typeof v === 'number' ? v.toFixed(2) : v}\n`;
     });
+    body += `\nML KPI Predictions (${ml.status}):\n`;
+    Object.entries(predictions).forEach(([key, prediction]) => {
+      body += `- ${key.replace(/_/g, ' ')}: ${prediction.value.toFixed(2)} (${prediction.model})\n`;
+    });
+    if (Object.keys(predictions).length === 0) body += `- ${ml.message}\n`;
     body += `\nTop Insights:\n`;
     insights.forEach((ins: string) => { body += `- ${ins}\n`; });
     const mailto = `mailto:?subject=Business Insights Report&body=${encodeURIComponent(body)}`;
@@ -94,6 +113,61 @@ export const Dashboard = ({ reportData }: { reportData?: any }) => {
             </div>
           ))}
         </div>
+      </GlassCard>
+
+      <GlassCard variant="elevated" className="p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ML KPI Predictions</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Model estimates trained from this upload, kept separate from calculated KPIs.
+            </p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+            ml.status === "trained"
+              ? "bg-emerald-100 text-emerald-700"
+              : ml.status === "error" || ml.status === "unavailable"
+                ? "bg-red-100 text-red-700"
+                : "bg-amber-100 text-amber-700"
+          }`}>
+            {ml.status}
+          </span>
+        </div>
+
+        {Object.keys(predictions).length === 0 ? (
+          <div className="rounded-xl border border-glass-border bg-muted/30 p-5 text-muted-foreground">
+            {ml.message}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Object.entries(predictions).map(([key, prediction]) => (
+              <div key={key} className="p-6 bg-glass/40 rounded-xl border border-glass-border">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-accent/10 rounded-lg text-accent">
+                    <BrainCircuit className="h-6 w-6" />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {prediction.model.replace(/_/g, " ")}
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  {safe(prediction.value?.toFixed(2))}
+                </div>
+                <div className="text-sm text-muted-foreground capitalize mt-1">
+                  {key.replace(/_/g, " ")}
+                </div>
+                <div className="mt-4 pt-4 border-t border-glass-border text-xs text-muted-foreground space-y-1">
+                  <div>{prediction.training_rows} training samples · {prediction.horizon.replace(/_/g, " ")}</div>
+                  {prediction.validation_score !== undefined && (
+                    <div>
+                      Validation {prediction.validation_metric?.replace(/_/g, " ")}: {prediction.validation_score.toFixed(3)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </GlassCard>
 
       <GlassCard variant="elevated" className="p-8">

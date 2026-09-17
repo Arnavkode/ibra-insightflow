@@ -19,6 +19,10 @@ go-backend/uploads/*
 !go-backend/uploads/.gitkeep
 go-backend/*.exe
 report.pdf
+__pycache__/
+*.py[cod]
+.venv/
+.cache/
 
 # Editor directories and files
 .vscode/*

@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { GlassCard } from "./GlassCard";
 import { FileText, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { AnalysisReport } from "@/types/analysis";
 
 interface ReportActionsProps {
-  reportData?: any;
+  reportData?: AnalysisReport | null;
 }
 
 export const ReportActions = ({ reportData }: ReportActionsProps) => {
@@ -55,6 +56,10 @@ export const ReportActions = ({ reportData }: ReportActionsProps) => {
     let body = `Business Insights Report\n\nType: ${reportData?.type ?? 'N/A'}\n\nKPIs:\n`;
     Object.entries(kpis).forEach(([k, v]) => {
       body += `- ${k.replace(/_/g, ' ')}: ${typeof v === 'number' ? v.toFixed(2) : v}\n`;
+    });
+    body += `\nML KPI Predictions (${reportData?.ml?.status ?? 'N/A'}):\n`;
+    Object.entries(reportData?.ml?.predictions || {}).forEach(([key, prediction]) => {
+      body += `- ${key.replace(/_/g, ' ')}: ${prediction.value.toFixed(2)} (${prediction.model})\n`;
     });
     body += `\nInsights:\n`;
     insights.forEach((ins) => { body += `- ${ins}\n`; });

@@ -1,0 +1,6 @@
+numpy>=1.26,<3
+pandas>=2.1,<3
+scikit-learn>=1.4,<2
+# Optional but preferred. If unavailable, the engine uses scikit-learn's
+# HistGradientBoosting models with the same training and validation pipeline.
+xgboost>=2.0,<4
