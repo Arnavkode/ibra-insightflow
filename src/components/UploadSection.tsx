@@ -43,80 +43,37 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
   };
 
   const handleFiles = async (file: File) => {
-    // Allow any file type; simulate upload/analysis and return randomized summary+insights
     setIsAnalyzing(true);
     toast({ title: "Uploading...", description: `${file.name} is being sent for analysis` });
 
-    // Simulated server processing delay
-    await new Promise(r => setTimeout(r, 1000));
-
-    // Try contacting backend but fallback to randomized local result
-    let backendResult: any = null;
     try {
       const formData = new FormData();
       formData.append('file', file);
       const res = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: formData });
-      if (res.ok) {
-        const body = await res.json();
-        if (body.results && Array.isArray(body.results) && typeof body.results[0] === 'string') {
-          try { backendResult = JSON.parse(body.results[0]); } catch (e) { backendResult = body.results[0]; }
-        } else {
-          backendResult = body;
-        }
+      const body = await res.json();
+
+      if (!res.ok || body.error) {
+        toast({
+          title: "Analysis failed",
+          description: body.error || `Server returned ${res.status}`,
+          variant: "destructive"
+        });
+        setIsAnalyzing(false);
+        return;
       }
+
+      toast({ title: "Analysis complete!", description: "Your dashboard is ready with insights and KPIs" });
+      setIsAnalyzing(false);
+      if (onAnalyze) onAnalyze(body);
     } catch (err) {
-      console.warn('[UploadSection] backend upload failed, using local mock', err);
+      console.error('[UploadSection] upload failed', err);
+      toast({
+        title: "Could not reach backend",
+        description: "Make sure the IBRAE backend is running on localhost:5000.",
+        variant: "destructive"
+      });
+      setIsAnalyzing(false);
     }
-
-    // Pre-generated randomized summaries + insights pool
-    const summaries = [
-      { shape: [8,7], columns: ['date','customer_id','revenue','profit','region','employee_left','converted'] },
-      { shape: [100,5], columns: ['date','user_id','orders','amount','country'] },
-      { shape: [50,6], columns: ['timestamp','session_id','page','duration','country','converted'] }
-    ];
-    const insightPool = [
-      'Increase marketing focus on regions with high conversion rates (North, West).',
-      'Consider a promotion to raise average order value — revenue growth is positive but modest.',
-      'Profit margin is healthy; investigate underperforming accounts for targeted support.',
-      'Customer churn is low; scale retention programs in top segments.',
-      'Optimize high-traffic landing pages to improve conversion by 10-15%.'
-    ];
-
-    function pickRandom(arr: any) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function pickN(arr: any[], n = 3) {
-      const copy = arr.slice();
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy.slice(0, n);
-    }
-
-    const mockSummary = pickRandom(summaries);
-    const mockInsights = pickN(insightPool, 3);
-
-    const resultObj = backendResult && typeof backendResult === 'object' ? backendResult : {
-      summary: {
-        shape: mockSummary.shape,
-        columns: mockSummary.columns,
-        summary: {},
-        missing: {},
-        outliers: {}
-      },
-      kpis: {
-        revenue_growth: Math.random() * 0.2 - 0.05,
-        profit_margin: Math.random() * 0.4
-      },
-      insights: mockInsights,
-      type: 'auto'
-    };
-
-    toast({ title: "Analysis complete!", description: "Your dashboard is ready with insights and KPIs" });
-    setIsAnalyzing(false);
-    if (onAnalyze) onAnalyze(resultObj);
   };
 
   const handleAnalyze = () => {
@@ -284,9 +241,7 @@ export const UploadSection = ({ onAnalyze }: UploadSectionProps) => {
         </Button>
         
         <p className="text-sm text-muted-foreground mt-4">
-          <span className="font-medium text-accent">⚡ IBRAE improves reporting efficiency by up to 80%*</span>
-          <br />
-          <span className="text-xs">*computed from processing time vs your baseline</span>
+          <span className="font-medium text-accent">⚡ Data cleaning, KPIs, and insights computed from your file</span>
         </p>
       </div>
     </GlassCard>

@@ -50,7 +50,6 @@ const Index = () => {
             />
           </section>
 
-          {/* Dashboard Section - Mock shown for demo */}
           {/* Dashboard shown after analysis/upload */}
           {showDashboard && (
             <section className="animate-slide-up">
@@ -61,7 +60,7 @@ const Index = () => {
           {/* Report Actions - Show when dashboard is visible */}
           {showDashboard && (
             <section className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <ReportActions />
+              <ReportActions reportData={reportData} />
             </section>
           )}
 

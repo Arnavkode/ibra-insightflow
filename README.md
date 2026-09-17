@@ -1,73 +1,160 @@
-# Welcome to your Lovable project
+# IBRAE — Business Insights Engine
 
-## Project info
+Upload a CSV or Excel file and get it cleaned, summarized, and analyzed:
+descriptive stats, missing-value and outlier detection, domain KPIs
+(sales / HR / marketing, with a generic fallback for anything else), and
+insights derived directly from the data (trend, correlation, concentration).
+Export the result as a PDF or email it to yourself.
 
-**URL**: https://lovable.dev/projects/a1d99d78-a4f7-4fc7-bd6e-fbaad90032e0
+Every number shown in the dashboard is computed from the file you upload —
+there is no mocked, randomized, or placeholder data anywhere in this app.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Project structure
 
-**Use Lovable**
+```
+ibra-insightflow/
+├── src/                  React + TypeScript frontend (Vite)
+│   ├── components/
+│   │   ├── UploadSection.tsx    file upload / Google Sheets URL fetch
+│   │   ├── Dashboard.tsx        KPI cards, insights, dataset summary
+│   │   └── ReportActions.tsx    PDF download, email export
+│   └── pages/Index.tsx          page wiring
+├── go-backend/           Go backend — THE backend the frontend talks to
+│   ├── main.go           HTTP server (routes, CORS)
+│   ├── table.go          CSV/XLSX parsing into an in-memory table
+│   ├── clean.go          dedup + forward/backward fill
+│   ├── analyze.go        summary stats, type detection, KPI computation
+│   ├── insights.go       trend / correlation / outlier / concentration insights
+│   └── pdf.go            PDF report generation
+└── backend/              DEPRECATED legacy Node/Express + Python backend.
+                           Kept for reference only — not used anymore.
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a1d99d78-a4f7-4fc7-bd6e-fbaad90032e0) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Prerequisites
 
-**Use your preferred IDE**
+- [Node.js](https://nodejs.org/) 18+ and npm
+- [Go](https://go.dev/dl/) 1.21+
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## 1. Run the backend (Go)
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+cd go-backend
+go run .
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+You should see:
 
-# Step 3: Install the necessary dependencies.
-npm i
+```
+Backend running on port 5000
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+To build a standalone binary instead:
+
+```sh
+cd go-backend
+go build -o ibrae-backend .
+./ibrae-backend
+```
+
+The backend listens on `http://localhost:5000` and needs no configuration,
+database, or API keys.
+
+---
+
+## 2. Run the frontend (Vite/React)
+
+In a separate terminal, from the project root:
+
+```sh
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Vite will print a local URL (typically `http://localhost:5173`). Open it in
+a browser — the frontend expects the Go backend to already be running on
+`localhost:5000`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Other frontend scripts:
 
-**Use GitHub Codespaces**
+```sh
+npm run build       # production build
+npm run build:dev   # development-mode build
+npm run preview     # preview a production build locally
+npm run lint        # run eslint
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 3. Using the app
 
-This project is built with:
+1. Go to the **Upload File** tab (or **Google Sheets URL** to fetch a public
+   CSV export link) and pick a `.csv`, `.xlsx`, or `.xls` file.
+2. The file is sent to the Go backend, which cleans it, computes stats, and
+   derives KPIs and insights.
+3. The dashboard shows:
+   - **KPIs** — domain-specific (e.g. `revenue_growth`, `churn_rate`,
+     `conversion_rate`) when the dataset matches a known type, plus generic
+     KPIs (row count, per-column averages) that are always present.
+   - **Insights** — plain-language observations actually derived from the
+     data (trend direction, strongest correlation, worst outlier column,
+     most-missing column, dominant category), not templated or random text.
+   - **Dataset summary** — shape, columns, missing-value counts.
+4. Use **Download PDF Report** or **Email Report** (in the Export & Share
+   section) to get the results out of the browser.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+If the backend is unreachable or a file can't be analyzed, the app shows a
+real error message — it never silently falls back to fake data.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/a1d99d78-a4f7-4fc7-bd6e-fbaad90032e0) and click on Share -> Publish.
+## API reference (Go backend, port 5000)
 
-## Can I connect a custom domain to my Lovable project?
+### `POST /api/upload`
 
-Yes, you can!
+Multipart form upload, field name `file`. Accepts `.csv`, `.xlsx`, `.xls`.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Response body:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```json
+{
+  "summary": {
+    "shape": [rows, cols],
+    "columns": ["..."],
+    "summary": { "<column>": { "count": 0, "mean": 0, "std": 0, "min": 0, "max": 0 } },
+    "missing": { "<column>": 0 },
+    "outliers": { "<column>": [0.0] }
+  },
+  "kpis": { "<kpi_name>": 0.0 },
+  "type": "sales | hr | marketing | generic",
+  "insights": ["..."]
+}
+```
+
+On failure, responds with HTTP 422 and `{"error": "..."}`.
+
+### `POST /api/generate-pdf`
+
+Accepts the same JSON shape as the `/api/upload` response and streams back a
+`report.pdf` file (`Content-Type: application/pdf`).
+
+### `GET /api/download`
+
+Serves the most recently generated `report.pdf` from the backend's working
+directory, if one exists.
+
+---
+
+## Notes
+
+- CORS is wide open (`Access-Control-Allow-Origin: *`) for local development.
+  Tighten this before deploying anywhere public.
+- Uploaded files are stored under `go-backend/uploads/`, which is
+  git-ignored — nothing you upload gets committed.
+- `backend/` (Node/Express + Python) is deprecated and kept only for
+  reference; the frontend does not call it.

@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Uploaded user files should never be committed
+backend/uploads/*
+!backend/uploads/.gitkeep
+go-backend/uploads/*
+!go-backend/uploads/.gitkeep
+go-backend/*.exe
+report.pdf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
